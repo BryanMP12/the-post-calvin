@@ -3,15 +3,16 @@
 A personal-essay blog by Calvin University alumni writers (est. 2013), with hundreds of authors, a
 long archive, reader comments and two published essay collections ("Books").
 This is a ground-up rebuild **and redesign** of a WordPress (Divi theme) site. Do not port WordPress
-themes, plugins or PHP; port *content and behavior* only (posts, authors, comments, URLs, feeds).
+themes, plugins or PHP; port _content and behavior_ only (posts, authors, comments, URLs, feeds).
 
 **People:** the editors (alumni volunteers) write, edit, publish and moderate comments in the EmDash
 admin. Most writers never log in: they are **bylines**, not users. The developer (repo owner)
 maintains code and the content model. Build for non-technical editors.
 
 ## Stack (change only via an ADR in docs/adr/)
+
 - **Framework:** Astro (server-rendered pages, zero client JS by default)
-- **CMS:** EmDash, running *inside* this Astro app — admin at `/_emdash/admin`, API at `/_emdash/api`
+- **CMS:** EmDash, running _inside_ this Astro app — admin at `/_emdash/admin`, API at `/_emdash/api`
 - **Hosting:** Cloudflare Workers via the Astro Cloudflare adapter; D1 (content + comments), R2 (media)
 - **Email:** Cloudflare Email Service (`send_email` binding), editor notifications only
 - **Styling:** Tailwind CSS v4 (+ `@tailwindcss/typography` for post bodies)
@@ -34,6 +35,7 @@ maintains code and the content model. Build for non-technical editors.
 custom solutions. If a requirement seems to need a workaround, stop and raise it instead of hacking.
 
 ## Repo map
+
 ```
 astro.config.ts     Astro + EmDash config
 src/pages/          File-based routes (see "URLs")
@@ -58,20 +60,21 @@ scripts/git-hooks/  Pre-commit formatting (installed by pnpm install)
 ```
 
 ## Commands
-- `pnpm dev`        — local dev (Astro + EmDash, local D1/R2; email is simulated and logged)
-- `pnpm check`      — `astro check` + oxlint (type-aware) + `oxfmt --check` + unit tests. **Must pass before you say you're done.**
+
+- `pnpm dev` — local dev (Astro + EmDash, local D1/R2; email is simulated and logged)
+- `pnpm check` — `astro check` + oxlint (type-aware) + `oxfmt --check` + unit tests. **Must pass before you say you're done.**
 - `pnpm lint` / `pnpm format` / `pnpm test` — the individual pieces (`pnpm format` writes)
-- `pnpm test:e2e`   — Playwright against `pnpm build && pnpm preview` on port 4322 (JavaScript disabled by default).
+- `pnpm test:e2e` — Playwright against `pnpm build && pnpm preview` on port 4322 (JavaScript disabled by default).
   Each run starts from an empty local database in `.wrangler/e2e-state` (never the dev data), and
   `tests/e2e/global-setup.ts` runs EmDash's setup step with "include sample content" (repeating the call
   until the chunked seed reports `seedComplete`), so the seed's fixture posts, bylines and comments are
   what e2e tests read. The build's copy of `.dev.vars` (`dist/server/.dev.vars`) is deleted before preview,
   so personal dev vars never change e2e results. First run: `pnpm exec playwright install chromium`.
-- `pnpm typegen`    — `wrangler types` + `astro sync` (run after changing bindings or EmDash schema)
-- `pnpm build`      — build with the local (top-level) wrangler config, as e2e uses it
+- `pnpm typegen` — `wrangler types` + `astro sync` (run after changing bindings or EmDash schema)
+- `pnpm build` — build with the local (top-level) wrangler config, as e2e uses it
 - `pnpm migrate <step>` — the migration tool (alias for `pnpm --filter migrate run cli <step>`) (`extract`, `transform`, `load`, `media`, `verify`; see
   docs/migration.md). Agents may run `extract`/`transform` and `load`/`media` **against the local dev site only**.
-- `pnpm deploy`     — `CLOUDFLARE_ENV=production` build + `wrangler deploy` (uses `env.production` in
+- `pnpm deploy` — `CLOUDFLARE_ENV=production` build + `wrangler deploy` (uses `env.production` in
   `wrangler.jsonc`, which sets `EMDASH_SITE_URL`). Humans only; see docs/runbooks/launch.md.
 - `pnpm deploy:staging` — the same with `CLOUDFLARE_ENV=staging` (`env.staging`): the unlisted preview
   for the editors (domain in docs/runbooks/staging.md). Humans only.
@@ -80,6 +83,7 @@ scripts/git-hooks/  Pre-commit formatting (installed by pnpm install)
   (same for `preview`). `--ignore-lock` forces the foreground (the Playwright config uses it).
 
 ## Definition of done (every task)
+
 1. `pnpm check` passes with zero new warnings.
 2. New behavior has a test (unit for logic, Playwright for user-visible flows).
 3. No hardcoded editorial copy in components: content comes from EmDash; fixed UI text from `src/strings.ts`.
@@ -88,6 +92,7 @@ scripts/git-hooks/  Pre-commit formatting (installed by pnpm install)
 6. End with a summary of what changed and anything you were unsure about.
 
 ## TypeScript rules
+
 The type checker is the main safety net for autonomous work. Don't weaken it to make errors go away.
 
 **Config** (tsconfig extends `astro/tsconfigs/strictest`, plus): `noUncheckedIndexedAccess`,
@@ -101,6 +106,7 @@ The same rules apply to `tools/migrate/` (its tsconfig extends the root one).
 
 **Banned** (enforced by oxlint's typescript-eslint rules, which mirror `strictTypeChecked` + `stylisticTypeChecked`;
 `enum` and runtime `namespace` are also compile errors via `erasableSyntaxOnly`):
+
 - `any` (explicit or implicit). Use `unknown` and narrow it.
 - Non-null assertions `x!`. Handle the `undefined` case or restructure so it can't happen.
 - Type assertions `x as T` and `<T>x`. Allowed: `as const`. Prefer `satisfies` to check a value against a type.
@@ -109,6 +115,7 @@ The same rules apply to `tools/migrate/` (its tsconfig extends the root one).
 - Double casts (`as unknown as T`). Never.
 
 **Do instead:**
+
 - **Parse at the boundaries.** Anything from outside the type system (EmDash responses if not already
   typed, WordPress REST/WXR data, `FormData`, env vars, `JSON.parse`, `fetch`, URL params, headers) is
   validated with Zod or narrowed with a type guard, never cast. Inside the boundary, trust the types.
@@ -123,6 +130,7 @@ small, tested function with `// oxlint-disable-next-line <rule> -- <reason>`, an
 A new escape hatch needs human approval.
 
 ## Astro rules
+
 - **Zero client JS by default.** A `<script>` tag is allowed only for small progressive
   enhancements (nav toggle, inline form feedback). Pages must work without it.
 - Public pages are CMS-driven, so they render on demand (`output: "server"`). Don't prerender them or use
@@ -143,7 +151,9 @@ A new escape hatch needs human approval.
   (`tools/migrate/` runs in Node and is never imported by `src/`.)
 
 ## URLs (preserve the WordPress ones)
+
 Existing links from social media, Calvin pages and search engines must keep working.
+
 - Posts: `/{slug}/` (WordPress "post name" permalinks, trailing slash). Pages share the same namespace,
   so a post slug and a page slug must never collide (validated in `src/lib/content`, checked by the migration).
 - Authors: `/author/{slug}/`. Categories: `/category/{slug}/`. Tags: `/tag/{slug}/`.
@@ -155,6 +165,7 @@ Existing links from social media, Calvin pages and search engines must keep work
 - `trailingSlash` is set once in `astro.config.ts`; build links with `src/lib/url.ts`, never by hand.
 
 ## Multi-author (bylines)
+
 - Writers are **EmDash bylines** (guest bylines without accounts are normal). Users are only for editors.
 - A post can have several bylines (EmDash supports this natively; the archive has none known today,
   so migrated posts get one each). Render them in order with `<Byline>`.
@@ -163,6 +174,7 @@ Existing links from social media, Calvin pages and search engines must keep work
 - Byline slugs match the old `/author/{slug}/` slugs.
 
 ## Comments
+
 - Use **EmDash's built-in comments** (storage in D1, moderation queue and admin screens, comment hooks).
   Don't build a parallel comment system or add a third-party widget.
 - New comments are **held for moderation** by default; editors approve in the admin.
@@ -177,6 +189,7 @@ Existing links from social media, Calvin pages and search engines must keep work
   post instead (decision D2 in docs/plan.md).
 
 ## Search
+
 - Use **EmDash's full-text search** (`search` from `"emdash"`, FTS5 on D1) on the posts collection, with the
   fields marked searchable in the schema. No external search service without an ADR.
 - `/search/` is server-rendered from a GET form (`?q=`), works without JS, is paginated, `noindex`,
@@ -184,6 +197,7 @@ Existing links from social media, Calvin pages and search engines must keep work
 - Search query handling (trimming, length limit, paging) lives in `src/lib/content/search.ts` with tests.
 
 ## Forms
+
 - Every form is a plain HTML `<form method="POST">` bound to an Astro Action in `src/actions/`
   (unless EmDash's own comment endpoint is the documented way; see "Comments").
 - Use `defineAction({ accept: "form", input: z.object(...) })`. Read results with
@@ -199,6 +213,7 @@ Existing links from social media, Calvin pages and search engines must keep work
   `FormAlert` and `SubmitButton` components.
 
 ## Email
+
 - All sending goes through `src/lib/email` (`EmailSender` interface). Never call the binding directly elsewhere.
 - **Scope: editor notifications only** (e.g. "a comment is waiting for moderation"), sent to one editors'
   address (`EDITORS_NOTIFY_EMAIL`, sender `EDITORS_EMAIL_FROM`) through the `EDITORS_EMAIL` binding,
@@ -209,6 +224,7 @@ Existing links from social media, Calvin pages and search engines must keep work
   external Mailchimp list, linked from a CMS-editable menu/setting. Changing that needs approval.
 
 ## Content & CMS rules
+
 - **CMS owns content; code owns layout.** If editors might want to change it, it goes in EmDash.
 - Use EmDash's query functions via thin wrappers in `src/lib/content`. Don't call the REST API from pages.
   The wrapper returns a discriminated union; the route file maps it to a response (200 / 404 / redirect).
@@ -241,6 +257,7 @@ Existing links from social media, Calvin pages and search engines must keep work
   content belongs to the editors. Agents use the dev instance only (including the EmDash MCP server).
 
 ## Migration (WordPress → EmDash)
+
 - Our own tool in `tools/migrate/`, **not** EmDash's WordPress import wizard or Exporter plugin.
 - Its dependencies (`@portabletext/block-tools`, a server DOM such as `linkedom`, WXR parsing) live only in
   `tools/migrate/package.json`. Never add them to the site's package.json. HTML → Portable Text uses
@@ -258,6 +275,7 @@ Existing links from social media, Calvin pages and search engines must keep work
 - Agents run `load`/`media` only against the local dev site. Staging and production runs are humans only.
 
 ## Styling (Tailwind v4)
+
 - This is a redesign: the approved design lives in `docs/design/` (reference mockup + tokens). Copy its
   values, never its markup or scripts. Nothing is carried over from the Divi theme.
 - Design tokens (colors, fonts, type scale, spacing, radii, shadows) live in the `@theme` block in
@@ -276,17 +294,20 @@ Existing links from social media, Calvin pages and search engines must keep work
 - Images go through the shared `<Image>` component (alt text required, responsive sizes, lazy by default).
 
 ## SEO & feeds
+
 - Every page: title, description, canonical, Open Graph/Twitter tags (featured image), via BaseLayout + `getSeoMeta`.
 - Posts emit `Article` JSON-LD with every byline as an author.
 - Sitemap from EmDash; `robots.txt` allows indexing only in production (staging is `noindex`).
 - RSS at `/feed/` with **full post content** (decided 2026-11-23), bylines and featured image.
 
 ## Analytics
+
 - Cloudflare Web Analytics only (cookie-free, no personal data, so no consent banner; decided 2026-11-23).
   Its beacon is the one allowed third-party script: loaded `defer` from BaseLayout, production only
   (token from an env var), and nothing depends on it. No Google Analytics/Site Kit, no other trackers.
 
 ## Guardrails for autonomous work
+
 - Work on a branch; never push to `main`. Open a PR with a summary and test evidence.
 - **Ask before:** adding a dependency, changing `wrangler.jsonc` bindings, deploying, touching DNS,
   changing URL structure, changing the content schema, running the migration anywhere but local dev,
@@ -297,9 +318,11 @@ Existing links from social media, Calvin pages and search engines must keep work
 - Keep PRs small and scoped to one task from docs/plan.md.
 
 ## Agent workflow (tool-agnostic)
+
 This file is the single source of instructions for every coding agent (and a useful read for humans).
 Keep it tool-neutral: no instructions that only one agent understands. Tool-specific setup lives in thin
 adapter folders that point back here and to the shared pieces below.
+
 - **Enforced for everyone by the repo, not by any agent:** `main` is branch-protected (PR + passing CI);
   CI runs `pnpm check` and `pnpm test:e2e`; a git pre-commit hook (`scripts/git-hooks/`, installed by
   `pnpm install`) runs oxfmt on staged files. Deploy credentials, Cloudflare secrets and production tokens
@@ -327,6 +350,7 @@ adapter folders that point back here and to the shared pieces below.
   import this file; never fork its content.
 
 ## Where to look
+
 - docs/plan.md — milestones, status, open decisions
 - docs/adr/ — architecture decisions (read before proposing changes)
 - docs/content-model.md — collections, fields, taxonomies, bylines, editor roles
