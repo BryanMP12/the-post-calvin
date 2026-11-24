@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Formats staged files with oxfmt and re-stages them. Installed by `pnpm install`
+# (the root "prepare" script sets core.hooksPath to scripts/git-hooks).
+# Files that are only partly staged are formatted as a whole; check `git diff` after committing.
+set -euo pipefail
+
+mapfile -d '' files < <(git diff --cached --name-only --diff-filter=ACMR -z)
+[ "${#files[@]}" -eq 0 ] && exit 0
+
+pnpm exec oxfmt --no-error-on-unmatched-pattern -- "${files[@]}"
+git add -- "${files[@]}"

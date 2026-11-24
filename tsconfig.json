@@ -1,0 +1,34 @@
+{
+  // Until the Astro scaffold lands, the flags of astro/tsconfigs/strictest are spelled out here.
+  // The scaffold PR replaces them with "extends": "astro/tsconfigs/strictest" and keeps the two
+  // flags AGENTS.md adds on top (noPropertyAccessFromIndexSignature, erasableSyntaxOnly).
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "noEmit": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "allowJs": true,
+    "checkJs": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "noPropertyAccessFromIndexSignature": true,
+    "erasableSyntaxOnly": true
+  },
+  "exclude": ["node_modules", "dist", "tools/migrate", "migration", "playwright-report", "test-results"]
+}

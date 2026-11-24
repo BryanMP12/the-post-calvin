@@ -3,7 +3,9 @@
 Status: **draft for review** (2026-11-23). Owner: developer. Rules for humans and coding agents: see AGENTS.md.
 
 ## Goal
+
 Replace the WordPress/Divi site at thepostcalvin.com with an Astro + EmDash site on Cloudflare that:
+
 - has a new design built for long-form reading,
 - supports many writers per site and per post (bylines), with author pages,
 - keeps reader comments (moderated) and full-text search,
@@ -12,6 +14,7 @@ Replace the WordPress/Divi site at thepostcalvin.com with an Astro + EmDash site
 - is easy for volunteer editors to run, and costs little to host.
 
 ## What we know about the current site (checked 2026-11-23)
+
 - WordPress + Divi (Elegant Themes), Google Site Kit; a PHP deprecation notice shows on the page.
 - Permalinks are `/{slug}/`; pagination `/page/{n}/`; author archives `/author/{slug}/`.
 - The public REST API (`/wp-json/wp/v2/…`) is open. `content.rendered` is plain HTML (no Divi
@@ -27,11 +30,17 @@ To confirm in M0/M5: total posts/pages/comments/media, whether older posts conta
 category/tag/date/feed URLs in use (from Search Console / logs), and what "Archives" and "Resources" contain.
 
 ## Milestones
+
 Each task is a small PR. ✅ done · 🟡 in progress · ⬜ not started.
 
-### M0 — Foundation ⬜
-- Repo setup: pnpm workspace (site + `tools/migrate`), Node 26, TS strict config, oxlint/oxfmt, Vitest,
+### M0 — Foundation 🟡
+
+- 🟡 Repo setup: pnpm workspace (site + `tools/migrate`), Node 26, TS strict config, oxlint/oxfmt, Vitest,
   Playwright, `pnpm check`, CI, branch protection on `main`, pre-commit format hook.
+  Done on branch `m0/repo-setup` except: branch protection (no GitHub remote yet; steps in
+  docs/runbooks/github.md). Until the scaffold, `pnpm check` runs `tsc` instead of `astro check` and
+  tsconfig spells out the strictest flags; the scaffold PR switches both. CI runs `pnpm check` only;
+  the e2e job comes with the scaffold.
 - Agent setup (tool-agnostic, see AGENTS.md "Agent workflow"): `scripts/agent/`, `docs/workflows/`,
   `.mcp.json`, EmDash skills in `.agents/skills/`, then the first tool adapter (`.claude/`) implementing
   the permission policy. Verify a fresh session of each agent you use picks up AGENTS.md.
@@ -44,6 +53,7 @@ Each task is a small PR. ✅ done · 🟡 in progress · ⬜ not started.
   notifications work, whether comments can be created with a historical date/status (needed for D2).
 
 ### M1 — Redesign ⬜ (can run in parallel with M0)
+
 - Brief with editors: audience (alumni + current students + book readers), tone, what to keep (name,
   Calvin connection, the books), what's wrong today.
 - Content inventory of page types: home, post, author, category/tag archive, archives index, search,
@@ -54,6 +64,7 @@ Each task is a small PR. ✅ done · 🟡 in progress · ⬜ not started.
   Reading quality is the priority: measure, line height, image treatment, pull quotes, dark mode (D6).
 
 ### M2 — Content model + core pages ⬜
+
 - Schema in `seed/seed.json`: `posts` (title, slug, excerpt, featured image + alt, body, bylines,
   category, tags, published date, SEO; supports drafts, revisions, preview, scheduling, search, comments),
   `pages`, `books` (cover, description, retailer links — or pages with a custom block; decide in M2),
@@ -67,12 +78,14 @@ Each task is a small PR. ✅ done · 🟡 in progress · ⬜ not started.
 - e2e: every page type renders without JS; axe passes.
 
 ### M3 — Search ⬜
+
 - `src/lib/content/search.ts` over EmDash FTS (title, excerpt, body, byline names if supported).
 - `/search/?q=` page: GET form, paginated, highlighted excerpts, empty/no-result states, `noindex`.
 - Search form in the header (no JS). Redirect WordPress `/?s=` → `/search/?q=`.
 - Unit tests for query handling; e2e for search with the seed fixtures. Re-check relevance on real data after M6.
 
 ### M4 — Comments ⬜
+
 - `<Comments>`: approved comments (threaded if EmDash supports replies), count on cards/posts, form.
 - No-JS form + Turnstile; held for moderation; success/"awaiting moderation"/error states.
 - Editor notification for pending comments (only if EmDash doesn't already provide it).
@@ -80,7 +93,9 @@ Each task is a small PR. ✅ done · 🟡 in progress · ⬜ not started.
 - Runbook: comment moderation for editors. e2e: submit → pending → approve in admin → visible.
 
 ### M5 — Migration tool ⬜ (start once the M2 schema is stable)
+
 First task: expand this section into docs/migration.md (the full design + runbook). Summary:
+
 1. **extract** — page through the public REST API (`posts`, `pages`, `users`, `categories`, `tags`,
    `media`, `comments`) with `context=view`, plus a WXR export (Tools → Export, from an editor) for drafts,
    private posts, author details and anything the REST API hides. Save raw JSON snapshots. Measure counts.
@@ -97,37 +112,45 @@ First task: expand this section into docs/migration.md (the full design + runboo
 4. **media** — download originals (not resized variants), upload to EmDash media/R2, rewrite references.
 5. **verify** — counts per type match; sampled visual/text diff old vs new; every old post URL returns 200
    on the new site; every old redirect target resolves; no broken internal links or images; report.
+
 - Develop against local dev with a sample (e.g. 50 posts across years), then a full run locally.
 
 ### M6 — Rehearsal on staging + editor onboarding ⬜
+
 - Full migration run on staging (developer). Editors review: old vs new side by side for a sample per year.
 - Fix mapping issues, re-run (idempotent). Measure total run time for the cutover window.
 - Editor guide, onboarding, moderation runbook; editors try writing and publishing a post on staging.
 - Performance (Lighthouse) and accessibility pass on real content.
 
 ### M7 — Launch ⬜
+
 - Freeze WordPress (no new posts/comments; close comments) → final delta extract (modified since rehearsal)
   → run on production (developer) → verify → DNS/route switch → re-verify old URLs live.
 - Search Console: submit new sitemap, watch 404s; check `/feed/` in a feed reader.
 - Keep WordPress read-only (or a static export) for 30–90 days as a fallback, then archive the DB + uploads.
 
 ### Later (not in scope)
+
 - Newsletter integration beyond the Mailchimp link · reader accounts · comment reply emails ·
   submissions form for new writers (would follow the Forms rules) · analytics choice (D7).
 
 ## Repo layout
+
 One repo, a pnpm workspace with two packages:
+
 ```
 /                     the site (Astro + EmDash Worker): src/, seed/, tests/, astro.config.ts, wrangler.jsonc
 tools/migrate/        the migration tool: own package.json, tsconfig (extends root), src/, tests/
 pnpm-workspace.yaml   packages: [".", "tools/migrate"]
 ```
+
 The tool talks to the site only over EmDash's HTTP API, so it never imports site code and its
 dependencies never reach the Worker bundle. It lives in the same repo so its Portable Text schema
 can be checked against the blocks `<Prose>` renders in one PR. After launch it is archived (moved to a
 tag/branch or deleted) once the fallback period ends.
 
 ## Decisions
+
 - **D1 ✅ HTML → Portable Text:** `@portabletext/block-tools` + a server DOM (`linkedom`), in `tools/migrate` only.
 - **D3 ✅ Comments** stay open on every post.
 - **D4 ✅ Co-authorship:** none known in the archive; EmDash supports multiple bylines per post natively,
@@ -137,6 +160,7 @@ tag/branch or deleted) once the fallback period ends.
 - **D7 ✅ Analytics:** Cloudflare Web Analytics (cookie-free). Remove Site Kit/GA at cutover.
 
 ## Open decisions
+
 - **D2 Historical comments — direction agreed (2026-11-23):** keep original dates, names, threading and
   status. (a) Create them through an EmDash API or plugin that accepts date + status, if the M0 spike finds
   one; otherwise (c) store them as a read-only archived-comments field on each post and use EmDash comments

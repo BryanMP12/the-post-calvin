@@ -1,0 +1,30 @@
+{
+  "name": "the-post-calvin",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "scripts/git-hooks/install.sh",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
+    "typecheck": "tsc -p tsconfig.json && pnpm --filter migrate run typecheck",
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "migrate": "pnpm --filter migrate run cli"
+  },
+  "devDependencies": {
+    "@astrojs/compiler-rs": "0.5.3",
+    "@playwright/test": "1.65.1",
+    "@types/node": "26.6.6",
+    "oxfmt": "0.80.0",
+    "oxlint": "1.95.0",
+    "oxlint-tsgolint": "7.0.2008",
+    "typescript": "6.0.3",
+    "vitest": "5.1.1"
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "packageManager": "pnpm@12.21.0"
+}
