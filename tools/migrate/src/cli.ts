@@ -8,7 +8,7 @@ function run(step: Step): number {
     case "load":
     case "media":
     case "verify":
-      stderr.write(`Step "${step}" is not implemented yet (milestone M5).\n`);
+      stderr.rite(`Step "${step}" is not implemented yet (milestone M5).\n`);
       return 1;
     default: {
       const unreachable: never = step;
