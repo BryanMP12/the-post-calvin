@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "emdash-docs": {
+      "type": "http",
+      "url": "https://docs.emdashcms.com/mcp"
+    },
+    "cloudflare-docs": {
+      "type": "http",
+      "url": "https://docs.mcp.cloudflare.com/mcp"
+    },
+    "emdash-dev": {
+      "type": "http",
+      "url": "http://localhost:4321/_emdash/api/mcp"
+    }
+  }
+}
