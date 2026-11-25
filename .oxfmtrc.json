@@ -1,5 +1,12 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "printWidth": 110,
-  "ignorePatterns": ["pnpm-lock.yaml", "dist/**", ".astro/**", ".wrangler/**", "migration/**"]
+  "ignorePatterns": [
+    "pnpm-lock.yaml",
+    "dist/**",
+    ".astro/**",
+    ".wrangler/**",
+    "migration/**",
+    ".agents/skills/**"
+  ]
 }

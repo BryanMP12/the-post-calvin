@@ -39,7 +39,7 @@ Each task is a small PR. ✅ done · 🟡 in progress · ⬜ not started.
   Playwright, `pnpm check`, CI, branch protection on `main`, pre-commit format hook.
   Until the scaffold, `pnpm check` runs `tsc` instead of `astro check` and tsconfig spells out the
   strictest flags; the scaffold PR switches both. CI runs `pnpm check` only; the e2e job comes with the scaffold.
-- Agent setup (tool-agnostic, see AGENTS.md "Agent workflow"): `scripts/agent/`, `docs/workflows/`,
+- 🟡 Agent setup (tool-agnostic, see AGENTS.md "Agent workflow"): `scripts/agent/`, `docs/workflows/`,
   `.mcp.json`, EmDash skills in `.agents/skills/`, then the first tool adapter (`.claude/`) implementing
   the permission policy. Verify a fresh session of each agent you use picks up AGENTS.md.
 - Scaffold Astro + EmDash (start from EmDash's blog template structure, not its styles), Cloudflare adapter,

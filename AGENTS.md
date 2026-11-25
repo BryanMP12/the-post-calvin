@@ -331,8 +331,9 @@ adapter folders that point back here and to the shared pieces below.
   Ask first: `pnpm add`, `git push`, edits to `wrangler.jsonc`, `seed/seed.json`, `tsconfig.json`,
   `.oxlintrc.json`. Never: deploys, `wrangler secret`, remote D1/R2, pushing to `main`, `rm -rf`,
   npm/npx/yarn, reading `.env`/`.dev.vars`, reading `migration/` (it holds commenter personal data).
-- **Shared scripts** (`scripts/agent/`): `format-file.sh <path>` (run after editing a file) and
-  `check-if-dirty.sh` (runs `pnpm check` when the working tree has changes; run before saying you're done).
+- **Shared scripts** (`scripts/agent/`): `format-file.sh <path>` (run after editing a file),
+  `check-if-dirty.sh` (runs `pnpm check` when the working tree has changes; run before saying you're done)
+  and `sync-emdash-skills.sh <version>` (refreshes `.agents/skills/`).
   Agents that support hooks wire these up; others run them by hand.
 - **Workflows** (`docs/workflows/`, plain Markdown any agent can follow): `new-page.md`,
   `new-content-type.md` (propose, then wait for approval), `release.md` (get a branch PR-ready; never push
@@ -344,6 +345,9 @@ adapter folders that point back here and to the shared pieces below.
   that use another config format mirror it. Never connect an agent to production.
 - **Skills:** EmDash's agent skills live in `.agents/skills/` (e.g. `building-emdash-site`). Read the
   relevant `SKILL.md` before EmDash work if your agent doesn't load them automatically.
+  They are vendored unchanged at the installed emdash version (`.agents/emdash-skills-version`; re-sync with
+  `scripts/agent/sync-emdash-skills.sh <version>`). Where a skill and this file disagree, this file wins:
+  e.g. run `pnpm exec emdash …`, not `npx emdash …`, and only against the local dev site.
 - **Adapters:** `.claude/` (Claude Code: settings, hooks and commands that implement the above) is the
   first one. Add others (e.g. `.codex/`, `.cursor/`) the same way. Personal overrides go in each tool's
   gitignored local settings file. If a tool reads a different instructions file name, symlink or

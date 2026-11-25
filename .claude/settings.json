@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm check)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm format)",
+      "Bash(pnpm format:check)",
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm test)",
+      "Bash(pnpm test *)",
+      "Bash(pnpm test:e2e)",
+      "Bash(pnpm test:e2e *)",
+      "Bash(pnpm typegen)",
+      "Bash(pnpm build)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm install)",
+      "Bash(pnpm migrate extract)",
+      "Bash(pnpm migrate transform)",
+      "Bash(pnpm exec astro *)",
+      "Bash(pnpm exec playwright *)",
+      "Bash(pnpm exec oxlint *)",
+      "Bash(pnpm exec oxfmt *)",
+      "Bash(pnpm exec tsc *)",
+      "Bash(pnpm exec vitest *)",
+      "Bash(scripts/agent/format-file.sh *)",
+      "Bash(scripts/agent/check-if-dirty.sh)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git branch *)",
+      "Bash(git switch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git restore *)",
+      "Bash(git stash *)",
+      "Bash(git fetch *)"
+    ],
+    "ask": [
+      "Bash(pnpm add *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm i *)",
+      "Bash(git push *)",
+      "Edit(./wrangler.jsonc)",
+      "Edit(./seed/seed.json)",
+      "Edit(./tsconfig.json)",
+      "Edit(./.oxlintrc.json)"
+    ],
+    "deny": [
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(yarn *)",
+      "Bash(rm -rf *)",
+      "Bash(rm -fr *)",
+      "Bash(pnpm deploy*)",
+      "Bash(*wrangler deploy*)",
+      "Bash(*wrangler secret*)",
+      "Bash(*wrangler * --remote*)",
+      "Bash(git push * main*)",
+      "Bash(git push *:main*)",
+      "Bash(* .dev.vars*)",
+      "Bash(* .env*)",
+      "Bash(* migration/*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(**/.dev.vars)",
+      "Read(**/.dev.vars.*)",
+      "Read(./migration/**)"
+    ]
+  },
+  "enabledMcpjsonServers": ["emdash-docs", "cloudflare-docs", "emdash-dev"],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format-edited-file.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-on-stop.sh",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}
